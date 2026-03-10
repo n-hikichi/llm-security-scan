@@ -255,3 +255,113 @@ $ unzip llm-security-scan.zip
 
 （Claude Login ページのスクリーンショット）
 
+---
+
+# 付録 D LLM ポータビリティと柔軟性
+
+**日付:** 2026年3月10日
+
+## LLM架構の多様性
+
+本ツール「llm-security-scan」は、現在 **Claude AI** を LLM エンジンとして実装していますが、その設計上の特性から、**他の大規模言語モデル (LLM) への移植は技術的に容易** です。
+
+## 現在の実装（Claude ベース）
+
+```
+Claude Code CLI
+    ↓
+Agent-Skill (Python実行環境)
+    ↓
+プロジェクト分析・脆弱性検出
+    ↓
+セキュリティレポート生成
+```
+
+## 他の LLM への移植可能性
+
+### a. 技術的な理由
+
+1. **Agent-Skill の独立性**
+   - Agent-Skill は Anthropic クラウド環境で実行される独立した Python 実行空間
+   - LLM エンジンの選択が本質的に分離されている
+   - 別の LLM への接続は、API 呼び出し部分の置き換えで対応可能
+
+2. **プロンプト設計の汎用性**
+   - セキュリティチェックリスト（cli-security-prompt.md、sv-security-prompt.md）
+   - 大多数の先進 LLM（Claude、GPT-4、Codex など）で同等に機能
+   - 言語モデルの能力レベルが近い場合、プロンプトの再調整で対応可能
+
+### b. 移植可能な LLM の例
+
+#### OpenAI Codex（OpenCode 経由）
+
+```bash
+# 現在（Claude ベース）
+claude mcp add serena -- uvx --from git+https://github.com/oraios/serena ...
+
+# 移植例（Codex ベース）
+opencode mcp add serena -- ...
+# または直接 OpenAI API を利用
+```
+
+- **適性**: 高い。Codex は同等以上のコード理解能力を持つ
+- **実装工数**: 中程度（API キー管理、エラーハンドリング）
+
+#### Google Gemini
+
+```python
+# API 呼び出しの置き換え例
+from anthropic import Anthropic  # 現在
+# ↓
+import google.generativeai as genai  # Gemini への置き換え
+```
+
+- **適性**: 中程度。マルチモーダル対応により潜在的に有利
+- **実装工数**: 中程度
+
+#### Meta Llama（オンプレミス）
+
+- **適性**: 中程度。十分な能力があるが、セキュリティ分析の専門性では劣る可能性
+- **実装工数**: 高い（インフラ構築）
+
+### c. 一般的な移植手順
+
+1. **Agent-Skill 内の LLM API 置き換え**
+   ```python
+   # 現在の実装
+   from anthropic import Anthropic
+   client = Anthropic(api_key=...)
+
+   # 新しい LLM への置き換え
+   import openai  # または別のプロバイダ
+   client = openai.OpenAI(api_key=...)
+   ```
+
+2. **API インターフェースの統一化**
+   - リクエスト形式の標準化（roles, content など）
+   - エラーハンドリングの一般化
+
+3. **プロンプトの微調整**
+   - LLM ごとの得意な指示形式への最適化
+   - 例：Claude は詳細なシステムプロンプトに強い傾向
+
+4. **テストと検証**
+   - 複数のサンプルプロジェクトでのスキャン実施
+   - 出力品質と検出率の比較
+
+## 今後の拡張方向
+
+- **マルチ LLM サポート**: ユーザーが LLM を選択できる仕組み
+- **LLM 比較モード**: 複数の LLM でスキャンし、結果を比較
+- **ハイブリッド戦略**: 分析フェーズごとに最適な LLM を選択
+
+## 設計上の考慮
+
+このツールが LLM ポータブルになっている理由：
+
+1. **プロンプトベースの設計** - 硬くコード化された検査ルールではなく、LLM の指示理解力に依存
+2. **API 中立的な構造** - 各 LLM の API の差異が吸収される層がある
+3. **Skill 機構の独立性** - Claude Code CLI から疎結合されている
+
+逆に、非常に特定の LLM 機能（例：Claude の vision capabilities など）に依存する場合は移植難度が上がります。
+
