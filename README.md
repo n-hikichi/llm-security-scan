@@ -116,9 +116,16 @@ Claude に以下を指示：
 
 ## ドキュメント
 
-- **[getting-started.md](getting-started.md)** - 初心者向けガイド（スライド形式）
+### Markdown 形式
+- **[getting-started.md](getting-started.md)** - 初心者向けガイド（スライド形式、Markdown）
 - **[how-to-start-LLM-base-scan.md](how-to-start-LLM-base-scan.md)** - 詳細なセットアップガイド
 - **[ChangeLog.md](ChangeLog.md)** - バージョン履歴
+
+### PowerPoint 形式（プレゼンテーション用）
+- **getting-started.pptx** - 初心者向けガイド（PowerPoint スライド）
+- **how-to-start-LLM-base-scan.pptx** - セットアップガイド（PowerPoint スライド）
+
+**注:** PPTX ファイルは Markdown から PowerPoint で変換されたプレゼンテーション資料です。チーム内での説明や勉強会での使用を想定しています。
 
 ## よくある質問
 
