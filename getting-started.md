@@ -151,15 +151,15 @@ claude mcp add serena -- uvx --from git+https://github.com/oraios/serena \
 ## 入力（何をスキャンするか）
 
 ```
-Git リポジトリ（ローカルで展開済み）
+Claude CLI を起動したディレクトリ
   ↓
-LLM Security Scan が自動判断
+そのディレクトリ以下を自動探索
   ├─ package.json で JavaScript/Node.js を検出
-  ├─ Vue.js/React/Express.js のプレームワークを判断
-  └─ プロジェクト構造から対応言語を認識
+  ├─ Vue.js/React/Express.js のフレームワークを判定
+  └─ プロジェクト型（クライアント/サーバー/ハイブリッド）を判定
 ```
 
-**自動判断：** リポジトリから言語・フレームワークを自動判定
+**自動判定：** 起動ディレクトリ以下のプロジェクト型を自動判定
 
 ---
 
