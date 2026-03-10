@@ -225,7 +225,19 @@ source code の README.md がある場所で claude を起動する。
 
 その後の認証のknow how は "付録B. Claudeの..." を参照のこと。
 
-### 4. このリポジトリの最新リリースから llm-security-scan.zip をダウンロードして、repository のルートディレクトリで展開する
+### 4. llm-security-scan.zip をダウンロードして展開する
+
+GitHub Releases から最新版をダウンロード：
+
+```bash
+$ curl -L https://github.com/n-hikichi/llm-security-scan/releases/latest/download/llm-security-scan.zip -o llm-security-scan.zip
+$ unzip llm-security-scan.zip
+```
+
+または、ブラウザで以下のリンクから直接ダウンロード：
+https://github.com/n-hikichi/llm-security-scan/releases/latest
+
+ダウンロード後、repository のルートディレクトリで展開します：
 
 ```bash
 $ unzip llm-security-scan.zip
