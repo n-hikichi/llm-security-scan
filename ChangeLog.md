@@ -1,5 +1,13 @@
 # ChangeLog
 
+## [1.0.0] - 2026-03-10
+
+### Added
+- **README.md** - Project overview with quick start guide
+- **getting-started.md** - Beginner guide with Markdown slide format (convertible to PPTX)
+- **Project structure documentation** - Emphasis on `.claude` directory importance and MCP/Skill integration
+- **LLM portability documentation** - Appendix D explaining technical feasibility of supporting other LLMs beyond Claude
+
 ## [Unreleased]
 
 ### Changed
