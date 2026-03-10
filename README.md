@@ -156,12 +156,34 @@ Claude Code CLI の認証を確認してください：
 gh auth status
 ```
 
+## プロジェクト構造
+
+```
+your-project/
+├── .claude/                          # ⭐ Claude Code 統合用ディレクトリ（重要）
+│   ├── skills/
+│   │   └── llm-security-scan/        # このツールがインストール される場所
+│   │       ├── SKILL.md              # Skill の定義・説明
+│   │       ├── scripts/              # セキュリティ分析スクリプト
+│   │       └── references/           # セキュリティプロンプト
+│   └── projects/*/memory/            # セッションメモリ（自動生成）
+├── package.json                      # プロジェクト定義（自動検出される）
+└── src/                              # ユーザーのソースコード
+```
+
+**`.claude` ディレクトリについて：**
+- `claude mcp add` で MCP Serena をセットアップするとここに登録されます
+- `unzip llm-security-scan.zip` で `.claude/skills/llm-security-scan/` に展開されます
+- Claude CLI はこのディレクトリから自動的に skill と MCP を読み込みます
+- **git でトラッキングしないでください** - `.gitignore` で除外推奨
+
 ## 技術仕様
 
 - **実装言語** - Python（検出スクリプト）、Markdown（セキュリティプロンプト）
 - **AI エンジン** - Claude API
 - **コード分析** - MCP Serena（オプション）
 - **出力形式** - Markdown（ターミナル表示 + ファイル保存可能）
+- **skill 配置** - `.claude/skills/llm-security-scan/` 配下
 
 ## ライセンス
 
