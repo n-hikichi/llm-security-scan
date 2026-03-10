@@ -192,10 +192,6 @@ your-project/
 - **出力形式** - Markdown（ターミナル表示 + ファイル保存可能）
 - **skill 配置** - `.claude/skills/llm-security-scan/` 配下
 
-## ライセンス
-
-このプロジェクトはオープンソースです。
-
 ## サポート
 
 - GitHub Issues で質問・報告してください
