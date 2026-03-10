@@ -334,9 +334,3 @@ def detect_language():
 - Claude AI は Python コードを完全に理解できるため、JavaScript と同等の分析精度が期待できる
 - MCP Serena も Python プロジェクトに対応可能
 - 既存の JavaScript チェックロジックの多くを Python に適用可能
-
-### 今後の開発優先度
-
-v1.1.0：Django/Flask 対応（最も需要が高い）
-v1.2.0：FastAPI/SQLAlchemy 対応
-v1.3.0：その他 Python フレームワーク対応
