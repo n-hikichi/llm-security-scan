@@ -27,7 +27,8 @@ $ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ```bash
 $ claude mcp add serena -- uvx --from git+https://github.com/oraios/serena \
-  serena-mcp-server --context ide-assistant --project $(pwd) --enable-webdashboard=false
+  serena start-mcp-server --context ide-assistant --project $(pwd) \
+  --open-web-dashboard false
 ```
 
 ### c. 確認コマンド

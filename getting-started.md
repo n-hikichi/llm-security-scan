@@ -48,7 +48,7 @@
 
 ## 前提条件
 - Claude Code CLI がインストール済み
-- 対象プロジェクトが git clone 済み
+- **対象プロジェクト (SUT) が git clone 済みで、そのディレクトリにカレントディレクトリを移動済み**
 - uv（Python パッケージマネージャ）がインストール可能
 
 ## 所要時間
@@ -58,7 +58,7 @@
 
 ---
 
-# セットアップ手順（ステップ 1/3）
+# セットアップ手順（ステップ 1/5）
 
 ## ステップ 1: uv をインストール
 
@@ -70,41 +70,85 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ---
 
-# セットアップ手順（ステップ 2/3）
+# セットアップ手順（ステップ 2/5）
+
+## ステップ 1.5: SUT（スキャン対象）の準備
+
+以降のステップは **SUT ディレクトリをカレントにして** 実行します。
+未取得の場合は先に取得してください。
+
+```bash
+git clone <SUT リポジトリ URL>
+cd <SUT ディレクトリ>
+ls package.json   # JavaScript/Node.js プロジェクトであることを確認
+```
+
+> **前提**: スキャン対象リポジトリ (SUT) が用意され、`cd` でそのディレクトリに
+> 移動済みであること。次ステップの `--project $(pwd)` で cwd を SUT として
+> 登録するため、必ず SUT ディレクトリで実行してください。
+
+---
+
+# セットアップ手順（ステップ 3/5）
 
 ## ステップ 2: MCP Serena をセットアップ
 
-スキャン対象ディレクトリで以下を実行：
+> **前提**: ステップ 1.5 に従い、スキャン対象 (SUT) ディレクトリで本ステップを実行すること。
+> `--project $(pwd)` は cwd を Serena の対象プロジェクトとして登録するフラグです。
 
 ```bash
 claude mcp add serena -- uvx --from git+https://github.com/oraios/serena \
-  serena-mcp-server --context ide-assistant --project $(pwd) \
-  --enable-webdashboard=false
+  serena start-mcp-server --context ide-assistant --project $(pwd) \
+  --open-web-dashboard false
 ```
 
 その後、Claude CLI を再起動
 
 ---
 
-# セットアップ手順（ステップ 3/3）
+# セットアップ手順（ステップ 4/5）
 
 ## ステップ 3: Skill をインストール
 
-1. GitHub Releases から `llm-security-scan.zip` をダウンロード
+SUT ディレクトリで以下を実行：
+
+1. llm-security-scan リポジトリを clone
    ```bash
-   curl -L https://github.com/n-hikichi/llm-security-scan/releases/latest/download/llm-security-scan.zip \
-     -o llm-security-scan.zip
+   gh repo clone n-hikichi/llm-security-scan
    ```
 
-2. 展開する
+2. Skill ファイルを SUT に配置
    ```bash
-   unzip llm-security-scan.zip
+   cp -r llm-security-scan/.claude .
    ```
+   `.claude/skills/llm-security-scan/` に SKILL.md 等が配置されます。
 
 3. Claude Code に skill が認識されたか確認
    ```
    > skill
    ```
+
+---
+
+# セットアップ手順（ステップ 5/5）
+
+## ステップ 4: MCP Serena の Onboarding
+
+SUT ディレクトリで Claude CLI を起動し、MCP Serena の初期化処理を実行します。
+
+```bash
+claude
+```
+
+Claude に以下を指示：
+
+```
+> mcp serena の onboarding 処理を行って
+```
+
+- 初回のみ数分かかります（SUT の規模による）
+- 2 回目以降はキャッシュが効くため高速化されます
+- プロジェクト構造とシンボル情報が Serena に読み込まれ、以降のスキャンで活用されます
 
 ---
 
@@ -117,13 +161,12 @@ claude mcp add serena -- uvx --from git+https://github.com/oraios/serena \
    ↓
 2. "セキュリティスキャンを実行して" と指示
    ↓
-3. MCP Serena が初期化（初回のみ）
+3. Claude AI がコードを分析
    ↓
-4. Claude AI がコードを分析
+4. セキュリティレポート生成
    ↓
-5. セキュリティレポート生成
-   ↓
-6. 結果をファイルに保存（オプション）
+5. 結果をファイルに保存（オプション）
+   例: "セキュリティスキャン実施報告書を作成して"
 ```
 
 ⏱️ **所要時間：約 10 分**
