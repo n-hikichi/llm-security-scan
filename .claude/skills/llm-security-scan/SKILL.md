@@ -72,6 +72,10 @@ JavaScript/Node.js プロジェクトの包括的なセキュリティレビュ�
    > mcp serena 向けの onboarding 処理を行ってください
    ```
 
+   > **Serena が project activation を要求してきた場合**:  
+   > 既知 projects が累積していると、`--project` 指定済みでも初回ツール呼び出し時に「アクティブなプロジェクトがない / 既知 projects から選択 / 別のパスを指定」と聞かれることがある。  
+   > **必ず「別のパスを指定」を選び、SUT root の絶対パス（`package.json` がある場所、`.sut-config` の中身）を入力する**。カレントの scan tool dir や、既知 projects 内の親ディレクトリ名（例: `sut`）を選んではいけない。
+
 3. **セキュリティスキャンの実行**
    
    ```
