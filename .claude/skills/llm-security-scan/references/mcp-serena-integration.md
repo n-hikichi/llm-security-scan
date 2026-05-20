@@ -60,6 +60,10 @@ Claude Code CLI を起動後、以下のコマンドで MCP ツールが利用�
 
 この処理により、Serena がプロジェクト全体のシンボル情報を構築します。
 
+> **Tool 仕様の更新**:
+> - `check_onboarding_performed` ツールは Serena の現バージョンでは廃止された。onboarding 実施有無は `list_memories` の戻り（memory 一覧の有無）で判定する。
+> - 起動時に `--project` を指定していても、Serena 内部の既知 projects が累積していると、初回ツール呼び出し時に project activation の選択を求めることがある。その場合は **「別のパスを指定」を選び、SUT root の絶対パス（`package.json` がある場所）を入力する**。既知 projects 内の親ディレクトリ名（例: `sut`）や、scan tool dir（`mult-scan/` 等）を選ばないこと。
+
 ## セキュリティスキャンでの活用
 
 MCP Serena が有効な場合、以下の機能を活用できます:
