@@ -3,7 +3,7 @@
 
 usage: save_report.py <raw-output-file> <out-dir>
 
-- 1 行目が所定の見出しでなければ、拒否・空応答・途中終了とみなして exit 3
+- 所定の題名の行が無ければ、拒否・空応答・途中終了とみなして exit 3(題名より前の途中経過の文は捨てる)
 - 5 つの節がそろっていなければ exit 3
 - 「## 6. 機械可読出力」の JSON ブロックがあれば取り出して llm-security-report.json に保存
   (JSON として読めなければ exit 4。Markdown は保存する)
@@ -26,9 +26,16 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     lines = raw.splitlines()
-    if not lines or lines[0].strip() != TITLE:
-        print(f"error: レポートの 1 行目が「{TITLE}」ではありません(拒否・空応答・途中終了の可能性)", file=sys.stderr)
+    # claude -p は sub-task の待ち時間などに出た途中経過の文も標準出力に含めることがある。
+    # 題名の行より前は前置きとして捨てる。題名が無ければレポートになっていないとみなす。
+    title_at = next((i for i, line in enumerate(lines) if line.strip() == TITLE), None)
+    if title_at is None:
+        print(f"error: レポートの題名「{TITLE}」が見つかりません(拒否・空応答・途中終了の可能性)", file=sys.stderr)
         return 3
+    if title_at > 0:
+        print(f"note: 題名より前の {title_at} 行(途中経過の文)を捨てました", file=sys.stderr)
+        lines = lines[title_at:]
+        raw = "\n".join(lines)
     missing = [s for s in SECTIONS if not any(line.startswith(s) for line in lines)]
     if missing:
         print(f"error: レポートの節が足りません: {missing}", file=sys.stderr)
