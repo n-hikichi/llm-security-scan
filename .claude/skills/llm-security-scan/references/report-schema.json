@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "llm-security-scan report",
+  "type": "object",
+  "required": ["schema_version", "tool", "mode", "target", "model", "scan_date", "context_provided", "summary", "findings", "integrity_findings", "needs_triage"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "2.0" },
+    "tool": { "const": "llm-security-scan" },
+    "mode": { "enum": ["diff", "full"] },
+    "target": { "type": "string", "description": "比較した ref(差分モード)または対象ディレクトリ(全体モード)" },
+    "model": { "type": "string", "description": "使用モデル ID" },
+    "scan_date": { "type": "string", "format": "date" },
+    "context_provided": { "type": "boolean", "description": "SECURITY_REVIEW_CONTEXT.md を読んだか" },
+    "summary": {
+      "type": "object",
+      "required": ["high", "medium", "low", "integrity", "needs_triage"],
+      "additionalProperties": false,
+      "properties": {
+        "high": { "type": "integer" }, "medium": { "type": "integer" }, "low": { "type": "integer" },
+        "integrity": { "type": "integer" }, "needs_triage": { "type": "integer" }
+      }
+    },
+    "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" }, "description": "確信度 8 以上の所見" },
+    "integrity_findings": { "type": "array", "items": { "$ref": "#/$defs/finding" }, "description": "judgment_fail_open の所見" },
+    "needs_triage": { "type": "array", "items": { "$ref": "#/$defs/triage" }, "description": "確信度 5〜7 の候補" }
+  },
+  "$defs": {
+    "location": {
+      "type": "object", "required": ["file", "line"], "additionalProperties": false,
+      "properties": { "file": { "type": "string" }, "line": { "type": "string", "description": "行番号または範囲(例 \"28-30\")" } }
+    },
+    "finding": {
+      "type": "object",
+      "required": ["id", "title", "severity", "category", "cwe", "confidence", "locations", "description", "exploit_scenario", "recommendation"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "severity": { "enum": ["High", "Medium", "Low"] },
+        "category": { "type": "string" },
+        "cwe": { "type": "array", "items": { "type": "string", "pattern": "^CWE-[0-9]+$" }, "minItems": 1 },
+        "confidence": { "type": "integer", "minimum": 8, "maximum": 10 },
+        "locations": { "type": "array", "items": { "$ref": "#/$defs/location" }, "minItems": 1 },
+        "description": { "type": "string" },
+        "exploit_scenario": { "type": "string" },
+        "recommendation": { "type": "string" }
+      }
+    },
+    "triage": {
+      "type": "object",
+      "required": ["id", "title", "expected_severity", "category", "cwe", "confidence", "locations", "downgrade_reason", "to_confirm", "outside_diff"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "expected_severity": { "enum": ["High", "Medium", "Low"] },
+        "category": { "type": "string" },
+        "cwe": { "type": "array", "items": { "type": "string", "pattern": "^CWE-[0-9]+$" } },
+        "confidence": { "type": "integer", "minimum": 5, "maximum": 7 },
+        "locations": { "type": "array", "items": { "$ref": "#/$defs/location" }, "minItems": 1 },
+        "downgrade_reason": { "type": "string", "description": "フィルタが減点した理由" },
+        "to_confirm": { "type": "string", "description": "人が確認すべき点" },
+        "outside_diff": { "type": "boolean", "description": "差分外の既存問題なら true" }
+      }
+    }
+  }
+}
