@@ -18,6 +18,7 @@
 ## Trust boundaries and deployment facts
 
 - TLS termination: (例) reverse proxy / CDN → app server (plain HTTP inside is expected)
+- API reachability: (例) every backend endpoint is reachable directly without the frontend (A2B); UI-side restrictions, Origin/Referer checks and "the client never sends this value" are not authorization
 - Identity: (例) OIDC provider + server-side session cookie; CSRF token header on state-changing requests
 - Tenancy: (例) one DB per tenant, resolved from Host header; or shared DB with `tenant_id` column
 - Roles: (例) `admin` = customer-company administrator (own company only), `user`

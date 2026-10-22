@@ -49,6 +49,12 @@ skill を公式 `/security-review` prompt([anthropics/claude-code-security-revie
 
 ## [Unreleased]
 
+### Planned (2.1.0) — A2B 対策の分担で llm-security-scan が担う分(2026-10-19 決定)
+- `rules/org-specific.md` に SSRF の観点を追加する(ユーザー入力が外部・内部へのリクエストのホスト・プロトコルを制御できる経路。内部サービス呼び出し・外部 API クライアントなど送信側 HTTP クライアントの宛先)。公式 prompt にはカテゴリとして無く、除外 13(パスのみの SSRF)があるだけで、評価ケースにも SSRF が無いため検出は未検証。追加時は SSRF の合成評価ケースを 1 件新設して再評価する(`work-llm/eval-cases/build_case.sh`)
+- 「攻撃者はアプリを介さず API を直接呼ぶ」前提は、prompt を変えずに `rules/sut-context.template.md` の "API reachability" 行で対象ごとに宣言する(2.0.x で template のみ追記。再評価不要)
+- エンドポイント網羅の認可マトリクス(BOLA/IDOR)は別 skill `llm-a2b-security-scan` の担当。本 skill には足さない
+- SSRF の SAST は `semgrep-security-scan`(提案の第 2 段)も候補。2.1.0 の時点で LLM と Semgrep のどちらを主にするか決める
+
 ### Changed
 - **how-to-start-LLM-base-scan.md**: Removed redundant "install serena in advance" instruction. Section 1-b (`claude mcp add serena`) already handles serena installation, making the introductory text unnecessary. Clarified that uv is required as a prerequisite for the installation command in section 1-b. (2026-03-10)
 - **how-to-start-LLM-base-scan.md**: Added Appendix D explaining LLM portability and flexibility. Documents that the tool architecture supports migration to other LLMs (Codex, Gemini, Llama) beyond Claude, with technical rationale and migration strategies. (2026-03-10)
