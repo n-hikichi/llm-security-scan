@@ -1,12 +1,15 @@
 # ChangeLog
 
-## [2.0.2] - 未リリース(コミット済み・タグ未)
+## [2.0.2] - 2026-11-06
 
 後方互換。**SKILL.md とルールは変えない**(判定は変わらないので、評価ケースでの再評価は要らない)。
 
 ### Added
 - `save_report.py`:環境変数 `LLM_SCAN_SKILL_VERSION` があれば、Markdown の「## 1. ヘッダ」の節の末尾に「- skill の版: <値>」を **script が**追記する(multi-scan の統合サマリー Agent が「レポートに skill の版の数値が無い」と指摘したため。LLM に書かせると誤りうるので、決定的に入れる)。値は `^[A-Za-z0-9._+-]{1,64}$` に合うものだけ(合わなければ追記せず note を出す)。ヘッダに既にあれば足さない。未設定なら従来どおり(互換)。
 - `examples/multi-scan/run-3-llm.sh`:`LLM_SCAN_SKILL_VERSION="$(git describe --tags --always --dirty)"` を渡す。`-dirty` が付けば、タグの版と作業ツリーが違う。
+
+### Changed
+- 製品のリポジトリに、ローカルのセッションメモ(`.claude/projects/.../memory/MEMORY.md`)が追跡されていたので、追跡をやめた(`.gitignore` は `.claude/projects/` 全体に広げた。ファイルは手元に残る。内容は 2026-03 の作業メモで、固有の情報は含まない)。
 
 ## [2.0.0] - 2026-10-19
 

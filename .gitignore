@@ -3,7 +3,7 @@
 .claude/settings.local.json
 
 # Session Memory (runtime state)
-.claude/projects/*/memory/
+.claude/projects/
 
 # Node.js
 node_modules/
