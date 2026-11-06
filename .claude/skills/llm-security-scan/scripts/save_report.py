@@ -7,14 +7,35 @@ usage: save_report.py <raw-output-file> <out-dir>
 - 5 つの節がそろっていなければ exit 3
 - 「## 6. 機械可読出力」の JSON ブロックがあれば取り出して llm-security-report.json に保存
   (JSON として読めなければ exit 4。Markdown は保存する)
+- 環境変数 LLM_SCAN_SKILL_VERSION(呼び出し側が `git describe --tags --always --dirty` などで渡す)があれば、
+  Markdown の「## 1. ヘッダ」の節の末尾に「- skill の版: <値>」を、**この script が**追記する
+  (LLM に書かせると誤りうるため。skill(SKILL.md)は変えないので、評価ケースでの再評価は要らない)
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
 
 TITLE = "# セキュリティレビュー レポート"
 SECTIONS = ["## 1. ヘッダ", "## 2. 所見", "## 3. 完全性の所見", "## 4. 要確認", "## 5. 確認した範囲"]
+
+
+VERSION_RE = re.compile(r"^[A-Za-z0-9._+-]{1,64}$")
+
+
+def add_skill_version(md, version):
+    """ヘッダ節(## 1.)の末尾に、skill の版の行を足す。ヘッダに既にあれば足さない。"""
+    lines = md.split("\n")
+    start = next(i for i, l in enumerate(lines) if l.startswith("## 1. ヘッダ"))
+    end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("## ")), len(lines))
+    if any("skill の版" in l for l in lines[start:end]):
+        return md
+    at = end
+    while at > start + 1 and not lines[at - 1].strip():
+        at -= 1
+    lines.insert(at, f"- skill の版: {version}")
+    return "\n".join(lines)
 
 
 def main():
@@ -54,6 +75,12 @@ def main():
         except json.JSONDecodeError as e:
             print(f"error: 機械可読出力が JSON として読めません: {e}", file=sys.stderr)
             rc = 4
+    ver = os.environ.get("LLM_SCAN_SKILL_VERSION", "").strip()
+    if ver:
+        if VERSION_RE.match(ver):
+            body = add_skill_version(body, ver)
+        else:
+            print("note: LLM_SCAN_SKILL_VERSION の形式が不正なので、版を追記しませんでした", file=sys.stderr)
     (out_dir / "llm-security-report.md").write_text(body + "\n", encoding="utf-8")
     return rc
 

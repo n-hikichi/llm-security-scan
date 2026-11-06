@@ -87,6 +87,7 @@ python3 .claude/skills/llm-security-scan/scripts/save_report.py report.raw.md ou
 ```
 
 `save_report.py` は、レポートの題名と 5 節がそろっているかを検査する(拒否・空応答・途中終了なら終了コード 3)。
+環境変数 `LLM_SCAN_SKILL_VERSION`(例: `git describe --tags --always --dirty` の出力)を渡すと、ヘッダ節の末尾に「- skill の版: …」を追記する(LLM には書かせない)。
 
 ## 出力
 
