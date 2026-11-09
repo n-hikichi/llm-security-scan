@@ -1,5 +1,25 @@
 # ChangeLog
 
+## [2.1.0] - 2026-11-09
+
+後方互換(出力の節の構成・引数・allowed-tools は変えない)。ルールに SSRF の観点を足したので、評価ケースで再評価した(下の Verified)。
+
+### Added
+- `rules/org-specific.md`(対訳と、prompt に差し込む本文)に「サーバー側リクエスト偽造(SSRF)」を追加。送信側の HTTP・ネットワークのリクエスト(fetch、axios、got、requests、webhook・プロキシ・URL プレビュー、内部サービスの呼び出しなど)のうち、**宛先のホスト・ポート・スキームを呼び出し元が制御できるもの**(直接、または保存済みのデータ経由)、回避できる宛先の検査(解決前の文字列だけの検査、ブロックリスト、リダイレクト、Host / X-Forwarded-Host の信用)、そこから内部サービスやクラウドのメタデータに届くもの。カテゴリ識別子は `ssrf`(SKILL.md と README に追記)。
+- **公式の除外 13(「SSRF vulnerabilities that only control the path. SSRF is only a concern if it can control the host or protocol.」)は維持**。固定された(サーバー設定の)ホストの後ろの**パスやクエリだけ**を制御できるものは報告しない。ただし、ホストまたはスキームを制御できる場合、または「パス」が固定ホストの外へ出られる場合(`//` で始まる値、`@` を含む値、パスの代わりに絶対 URL を受け付けるもの)は報告する。
+- 公式 prompt には SSRF のカテゴリが無く、除外 13 があるだけだった。この追加は、新しい検出機能というより、**拾うもの(ホスト・スキームの制御)と拾わないもの(パスのみ)の境界を明示して、拾い漏れと過剰な指摘を減らす補強**。
+
+### Verified
+- モデル `claude-fable-5-1`、各 1 回の実行。評価ケースは非公開(合成ケースの作り方は評価リポジトリ側)。
+- 合成ケース 2 本: 利用者指定の URL にそのまま fetch するもの(陽性)は `ssrf` を報告(公式のみでも報告した)。固定ホストの後ろのファイル名だけを選べるもの(陰性)は、所見にならず、捨てた候補として除外 13 に当たると説明された。
+- 既存の評価ケース 11 本(差分スキャン): `ssrf` の誤検知なし。正解の所見は 9 本で同じ。境界のケース 2 本(所見 ↔ 要確認)は、過去の実行でも揺れていたもので、`ssrf` の語は出ておらず、原因は新ルールと断定できない(再実行はしていない)。
+- 実在の製品コードの全体スキャン(3 パッケージ、旧ルールの結果と比較): `ssrf` の新しい所見は 0 件。送信リクエストの宛先は固定ホストで、パスのみの制御と判断され、除外 13 のとおり報告されなかった。所見・要確認の件数に小さな差があったが、実行間のぶれと区別していない。
+- 未確認: 公式が見逃しやすい形(保存済み URL の後の取得、Host 系ヘッダ由来の送信先、webhook の登録先)での追加効果。
+
+### Notes
+- 認可マトリクス(BOLA/IDOR)は別 skill `llm-a2b-security-scan` の担当で、本 skill には足さない。「攻撃者はアプリを介さず API を直接呼ぶ」前提は、prompt を変えず、`rules/sut-context.template.md` の "API reachability" 行で宣言する(2.0.x で template に追記済み)。
+- SSRF の SAST(`semgrep-security-scan`)は、候補のまま(未着手)。
+
 ## [2.0.2] - 2026-11-06
 
 後方互換。**SKILL.md とルールは変えない**(判定は変わらないので、評価ケースでの再評価は要らない)。
@@ -59,13 +79,6 @@ skill を公式 `/security-review` prompt([anthropics/claude-code-security-revie
 - **LLM portability documentation** - Appendix D explaining technical feasibility of supporting other LLMs beyond Claude
 
 ## [Unreleased]
-
-### Planned (2.1.0) — A2B 対策の分担で llm-security-scan が担う分(2026-10-19 決定)
-- **2026-11-09: SSRF の観点を実装(ブランチ `feat/ssrf-2.1.0`。再評価待ち。タグ・マージはしない)**: `rules/org-specific.md`(対訳と差し込む本文)に「サーバー側リクエスト偽造」を追加し、カテゴリ識別子 `ssrf` を SKILL.md と README に追記。公式の除外 13(パスのみ)は維持。再評価は、合成ケース S01(陽性)・S02(陰性)と、既存ケースの退行の確認(評価ケースは非公開)。
-- `rules/org-specific.md` に SSRF の観点を追加する(ユーザー入力が外部・内部へのリクエストのホスト・プロトコルを制御できる経路。内部サービス呼び出し・外部 API クライアントなど送信側 HTTP クライアントの宛先)。公式 prompt にはカテゴリとして無く、除外 13(パスのみの SSRF)があるだけで、評価ケースにも SSRF が無いため検出は未検証。追加時は SSRF の合成評価ケースを 1 件新設して再評価する(`work-llm/eval-cases/build_case.sh`)
-- 「攻撃者はアプリを介さず API を直接呼ぶ」前提は、prompt を変えずに `rules/sut-context.template.md` の "API reachability" 行で対象ごとに宣言する(2.0.x で template のみ追記。再評価不要)
-- エンドポイント網羅の認可マトリクス(BOLA/IDOR)は別 skill `llm-a2b-security-scan` の担当。本 skill には足さない
-- SSRF の SAST は `semgrep-security-scan`(提案の第 2 段)も候補。2.1.0 の時点で LLM と Semgrep のどちらを主にするか決める
 
 ### Changed
 - **how-to-start-LLM-base-scan.md**: Removed redundant "install serena in advance" instruction. Section 1-b (`claude mcp add serena`) already handles serena installation, making the introductory text unnecessary. Clarified that uv is required as a prerequisite for the installation command in section 1-b. (2026-03-10)
