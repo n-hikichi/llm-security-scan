@@ -100,7 +100,7 @@ python3 .claude/skills/llm-security-scan/scripts/save_report.py report.raw.md ou
 | 5. 確認した範囲 | 対象ファイル。確信度 4 以下で捨てた候補を理由つきで列挙 |
 | 6. 機械可読出力 | `json` 引数のときだけ。`references/report-schema.json` に従う |
 
-所見のカテゴリは公式の識別子(`sql_injection` など)に加え、自社カテゴリ `tenant_boundary` / `token_handling` / `login_csrf` / `committed_secret` / `judgment_fail_open`。
+所見のカテゴリは公式の識別子(`sql_injection` など)に加え、自社カテゴリ `tenant_boundary` / `token_handling` / `login_csrf` / `committed_secret` / `ssrf` / `judgment_fail_open`。
 
 ## モデル
 

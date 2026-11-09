@@ -29,6 +29,13 @@
 - このカテゴリは追跡されている**すべてのファイル**が対象。テストコード、フィクスチャ、スクリプト、文書、コメントアウトされた行を含む。公式の除外 2・11・16(ディスク上の秘密、テスト専用ファイル、文書ファイル)はこのカテゴリには適用しない
 - 秘密が未使用・期限切れ・コメントアウト済み・攻撃経路が示せない、という理由で重大度や確信度を下げない。所見は「秘密実体が存在すること」そのもの。確信度は「実在する秘密実体か(プレースホルダではないか)」で付ける。重大度は最低 Medium。ローカル以外のホスト(データベース、クラウドサービス、外部 API)の資格情報は High
 
+**サーバー側リクエスト偽造(SSRF。サーバーからの送信リクエスト)**
+- 送信側の HTTP・ネットワークのリクエスト(fetch、axios、got、requests、urllib、HttpClient、webhook・プロキシ・URL プレビュー機能、内部サービスの呼び出し)のうち、宛先のホスト・ポート・スキームを呼び出し元が制御できるもの。リクエストのパラメータ・ヘッダ・ボディから直接決まる場合と、保存済みのデータ(登録済みの URL、アップロードのリモート URL など)から間接的に決まる場合の両方。サーバー側で宛先の許可リストを強制していないもの
+- 回避できる宛先の検査: 名前解決の前の URL 文字列だけを検査する(解決後のアドレスを検査しない)、ホスト名のブロックリスト、リダイレクトを追って内部アドレスに到達できる、Host や X-Forwarded-Host を信用して送信先の URL を作る
+- 上のように制御された宛先から、内部サービス(サービス間の通信、localhost の管理画面、クラウドのメタデータ 169.254.169.254)に届くもの
+- 固定された(サーバー設定の)ホストの後ろに付く**パスやクエリだけ**を呼び出し元が制御するものは報告しない(公式の除外 13 のまま)。ホストまたはスキームを制御できる場合、または「パス」が固定ホストの外へ出られる場合(`//` で始まる値、`@` を含む値、パスの代わりに絶対 URL を受け付けるもの)だけ報告する
+- カテゴリ識別子は `ssrf`
+
 **安全に関わる判定の完全性(人に関する健康・安全・適合性の判定を出力するサービス)**
 - 対象にそのようなサービスが含まれることは `SECURITY_REVIEW_CONTEXT.md` の "Sensitive data classes" や役割欄で示す。含まれなければこのカテゴリは出番がない
 - 判定の処理で、上流の失敗(LLM 呼び出し、DB 参照、パースエラー、データ欠落)が既定値・空値・「正常」の値に置き換えられ、リクエストが成功として返るもの。高リスクの対象が低リスクと報告されうる
@@ -56,6 +63,13 @@
 - Private keys, certificates with private keys, `.env` files with real values, connection strings or URLs with embedded passwords, or service credentials committed to the repository — report these even when the key is self-signed or "for development", since repository history is retained and the repository may be shared or cloned
 - This category applies to EVERY tracked file: test code, fixtures, scripts, documentation, and commented-out lines included. HARD EXCLUSIONS 2, 11 and 16 (secrets on disk, test-only files, documentation files) do NOT apply to this category
 - Do not lower severity or confidence for this category because the secret is unused, expired, commented out, or has no demonstrated attack path. The finding is the presence of the secret material itself: confidence reflects whether it is real secret material (not a placeholder), and severity is at least Medium; credentials for a non-local host (database, cloud service, third-party API) are High
+
+**Server-Side Request Forgery (outbound requests):**
+- Outbound HTTP/network requests (fetch, axios, got, requests, urllib, HttpClient, webhook / proxy / URL-preview features, internal service calls) whose destination host, port, or scheme can be controlled by the caller — directly from a request parameter, header, or body field, or indirectly from stored data (a saved URL, an upload's remote URL) — without a server-side allowlist of destinations
+- Destination checks that can be bypassed: validating only the URL string before resolution (not the resolved address), hostname blocklists, following redirects into internal addresses, or building the outbound URL from the Host or X-Forwarded-Host header
+- Internal services (service-to-service calls, localhost admin interfaces, cloud metadata endpoints such as 169.254.169.254) reachable through such a controlled destination
+- Do NOT report when the caller controls only a path or query segment appended to a fixed, server-configured host (this remains HARD EXCLUSION 13). Report only when the host or scheme is controlled, or when the "path" can escape the fixed host (a value starting with `//`, containing `@`, or an absolute URL accepted in place of a path)
+- Use the category identifier `ssrf`
 
 **Safety-Critical Judgment Integrity (services whose output is a health, safety, or eligibility judgment about a person):**
 - Applies when SECURITY_REVIEW_CONTEXT.md (component roles or "Sensitive data classes") shows that the target produces such judgments; otherwise this category has nothing to match

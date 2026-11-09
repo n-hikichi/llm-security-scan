@@ -61,6 +61,7 @@ skill を公式 `/security-review` prompt([anthropics/claude-code-security-revie
 ## [Unreleased]
 
 ### Planned (2.1.0) — A2B 対策の分担で llm-security-scan が担う分(2026-10-19 決定)
+- **2026-11-09: SSRF の観点を実装(ブランチ `feat/ssrf-2.1.0`。再評価待ち。タグ・マージはしない)**: `rules/org-specific.md`(対訳と差し込む本文)に「サーバー側リクエスト偽造」を追加し、カテゴリ識別子 `ssrf` を SKILL.md と README に追記。公式の除外 13(パスのみ)は維持。再評価は、合成ケース S01(陽性)・S02(陰性)と、既存ケースの退行の確認(評価ケースは非公開)。
 - `rules/org-specific.md` に SSRF の観点を追加する(ユーザー入力が外部・内部へのリクエストのホスト・プロトコルを制御できる経路。内部サービス呼び出し・外部 API クライアントなど送信側 HTTP クライアントの宛先)。公式 prompt にはカテゴリとして無く、除外 13(パスのみの SSRF)があるだけで、評価ケースにも SSRF が無いため検出は未検証。追加時は SSRF の合成評価ケースを 1 件新設して再評価する(`work-llm/eval-cases/build_case.sh`)
 - 「攻撃者はアプリを介さず API を直接呼ぶ」前提は、prompt を変えずに `rules/sut-context.template.md` の "API reachability" 行で対象ごとに宣言する(2.0.x で template のみ追記。再評価不要)
 - エンドポイント網羅の認可マトリクス(BOLA/IDOR)は別 skill `llm-a2b-security-scan` の担当。本 skill には足さない

@@ -85,7 +85,7 @@ allowed-tools: Bash(git diff:*), Bash(git status:*), Bash(git log:*), Bash(git s
    - 前提情報(`SECURITY_REVIEW_CONTEXT.md`)の有無
 2. **所見(確信度 8 以上)**
    - 公式の出力形式(REQUIRED OUTPUT FORMAT)に従い、1 件ごとに次を書く:ファイル:行番号、重大度(High / Medium / Low)、カテゴリ、CWE(1 つ以上)、確信度(フィルタの点数)、説明、悪用シナリオ、修正の推奨。
-   - カテゴリは公式の例と同じ形式の識別子で書く(`sql_injection` など)。自社カテゴリは `tenant_boundary` / `token_handling` / `login_csrf` / `committed_secret` / `judgment_fail_open`。
+   - カテゴリは公式の例と同じ形式の識別子で書く(`sql_injection` など)。自社カテゴリは `tenant_boundary` / `token_handling` / `login_csrf` / `committed_secret` / `ssrf` / `judgment_fail_open`。
    - 無ければ「該当なし」。
 3. **完全性の所見(攻撃者が起点ではないもの)**
    - `judgment_fail_open` の所見をここに分けて書く。脆弱性の件数には数えない。
