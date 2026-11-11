@@ -32,7 +32,7 @@
 3. `rules/sut-context.template.md` をもとに、対象リポジトリのルートに **`SECURITY_REVIEW_CONTEXT.md`** を書く。最低限、構成(コンポーネントと役割)、TLS 終端、認証とセッション方式、テナントの分け方、ロールの意味(特に admin の範囲)、扱う機微データ、受容済みのリスクを書く。
    - 協力会社・顧客由来のコードでは、この文書は自社側で書く。
    - ここに書いた事実はレビューの前提になる。実環境と違うと結論が変わる。
-4. 使用モデルを決める。標準は `claude-fable-5-1`。変える場合は再評価(`docs/operation.md` §6)。
+4. 使用モデルを決める。標準は `claude-fable-5-2`。変える場合は再評価(`docs/operation.md` §6)。
 
 ## 4. 実行
 
@@ -51,7 +51,7 @@
 ```bash
 cd <ツール用ディレクトリ>          # .claude/skills/llm-security-scan を含む
 SUT=/path/to/target/component
-claude -p --model claude-fable-5-1 --add-dir "$SUT" \
+claude -p --model claude-fable-5-2 --add-dir "$SUT" \
   --allowedTools "Read Glob Grep Task" > report.raw.md <<EOF
 @.claude/skills/llm-security-scan/SKILL.md
 
@@ -120,7 +120,7 @@ python3 .claude/skills/llm-security-scan/scripts/save_report.py report.raw.md ou
 | HTTPS のチェック | HTTP 待ち受けは Critical | 対象外(TLS 終端は前提情報で宣言) | 旧案件固有の補正で、プロキシ配備では誤検知になる |
 | 出力 | 全列挙 + アクションプラン | 所見 / 完全性 / 要確認 / 確認した範囲 | ノイズを減らし、境界の候補は人に回す |
 | 保存 | agent が Write | 呼び出し側が保存・検査 | 読み取り専用と、拒否・空応答の検知のため |
-| モデル | 指定なし | `claude-fable-5-1` を明示し、レポートに記録 | 再現性と再評価トリガの管理 |
+| モデル | 指定なし | `claude-fable-5-2` を明示し、レポートに記録 | 再現性と再評価トリガの管理 |
 | 言語 | JavaScript / Node.js | 問わない | Python 等のコンポーネントも対象にできる |
 | 廃止した文書 | how-to-start / getting-started / external-spec(v1) | 削除(v1 の最終コミット `fb3a80b` で参照。タグ `v1.0.0` には external-spec と pptx が含まれない) | 内容が v2 と合わない |
 

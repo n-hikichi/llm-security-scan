@@ -9,7 +9,7 @@ cd "$SCRIPT_DIR/llm-security-scan"
 
 SUT="$(cat .sut-config)"
 OUT=test-results/security
-MODEL="${LLM_SCAN_MODEL:-claude-fable-5-1}"
+MODEL="${LLM_SCAN_MODEL:-claude-fable-5-2}"
 RAW="$OUT/llm-security-report.raw.md"
 mkdir -p "$OUT"
 

@@ -14,7 +14,7 @@ Claude Code の skill として動く、LLM によるソースコードのセキ
 | 対応言語 | 問わない(LLM がソースを直接読む)。JavaScript / TypeScript / Vue / Python のコードベースで評価済み |
 | 権限 | **読み取り専用**。ファイルを書かず、ネットワークに出ず、外部ツール(`npm audit` 等)を実行しない |
 | 出力 | 日本語の Markdown レポート(5 節構成)。`json` 引数で固定スキーマの JSON も出力 |
-| 推奨モデル | `claude-fable-5-1`(評価済み。後述) |
+| 推奨モデル | `claude-fable-5-2`(評価済み。後述) |
 
 ### 設計方針
 
@@ -75,7 +75,7 @@ cp -r /tmp/llm-security-scan/.claude/skills/llm-security-scan .claude/skills/
 ```bash
 cd <ツール用ディレクトリ>          # .claude/skills/llm-security-scan を含む
 SUT=/path/to/target/component
-claude -p --model claude-fable-5-1 --add-dir "$SUT" \
+claude -p --model claude-fable-5-2 --add-dir "$SUT" \
   --allowedTools "Read Glob Grep Task" > report.raw.md <<EOF
 @.claude/skills/llm-security-scan/SKILL.md
 
@@ -104,7 +104,7 @@ python3 .claude/skills/llm-security-scan/scripts/save_report.py report.raw.md ou
 
 ## モデル
 
-- 推奨は **`claude-fable-5-1`**。自社製品コードを使った評価(差分ケース 12 件 × 3 回、全体モード 12 本)で、拒否・空応答なしに完走し、検出は `claude-opus-5-5` と同等以上だった。
+- 推奨は **`claude-fable-5-2`**。自社製品コードを使った評価(差分ケース、合成ケース、全体モード)で、拒否・空応答なしに完走し、検出は `claude-fable-5-1` と同等以上(悪化なし)だった。評価の記録と、旧推奨(`claude-fable-5-1`)の評価は `ChangeLog.md` を参照。
 - 使用モデルはレポートのヘッダと JSON に必ず記録される。
 - **モデルを変えたら、評価ケースで再評価する**(prompt・ルールの変更、公式 prompt の取り込みも同じ)。
 
@@ -118,7 +118,7 @@ python3 .claude/skills/llm-security-scan/scripts/save_report.py report.raw.md ou
 | 対象 | `.sut-config` のパスを `--add-dir` で渡す | 同じ。skill には引数 `full <パス> json` で渡す |
 | 許可ツール | `Read Write Edit Glob Grep Bash(python3:*) … mcp__serena__*` | **`Read Glob Grep Task` のみ** |
 | レポートの保存 | agent が `test-results/security/` に Write | **runner が標準出力を `save_report.py` で検査して保存**。ファイル名(`llm-security-report.md` / `.json`)は据え置き |
-| モデル | 指定なし | `--model claude-fable-5-1` を明示 |
+| モデル | 指定なし | `--model claude-fable-5-2` を明示 |
 | JSON | パッケージごとに形がばらばら | `references/report-schema.json` に固定 |
 
 出力ファイル名・引数・allowed-tools は multi-scan の I/F とみなす。互換性を壊す変更は SemVer のメジャーを上げ、multi-scan 側の付録 B に報告する。v1 → v2 はこの意味でメジャーバージョンアップ(許可ツールの縮小、保存方式の変更、JSON スキーマの固定)。
