@@ -12,6 +12,8 @@
 
 **テナント・会社の境界(マルチテナント SaaS)**
 - user_id、company_id、dept_id、session_id をキーにしたクエリで、呼び出し元のテナント・会社の範囲による絞り込みがなく、テナント A の利用者がテナント B の行を読み書きできるもの
+- 所有者・テナント・会社の条件が、クエリの一部の分岐にしか掛かっていないもの。OR の片側、UNION の枝、JOIN した表、サブクエリ、親子・階層を辿る条件(親 ID = 引数 など)のいずれかが、呼び出し元の範囲で絞られておらず、その分岐から別のテナント・会社の行が返りうるもの。事前に「引数の ID が自分の範囲に属する」ことを確認していても、クエリが返す関連の行(子、関連先)までを絞ったことにはならない。AND で WHERE 全体に掛かる条件や、検索条件だけの OR、テナントを持たないマスタ表との JOIN は対象にしない
+- 集計・分析用のロールや画面のためのエンドポイントが、集計値ではなく、個人を識別できる行(利用者 ID や氏名と、機微な値の組)を返すもの。そのロールが個人別のデータを見てよいかが `SECURITY_REVIEW_CONTEXT.md` に書かれていなければ、所見として確定せず、「要確認」に出して、人が確認すべき点としてロールの可視範囲を挙げる。見てよいと書かれていれば報告しない
 - 「admin」に会社・テナントをまたぐ無条件のアクセスを与える権限チェック。`SECURITY_REVIEW_CONTEXT.md` にテナント横断の特権ロールが明示されていない限り、admin は自分のテナント・会社の範囲に限られる管理者として扱う
 - リクエスト間で共有される可変の状態(モジュールレベルの変数、シングルトンのインスタンスフィールド、user_id だけをキーにしたキャッシュ)が、別のリクエストや別のテナントのデータを返しうるもの。例外を握りつぶした結果、前のリクエストの結果が残ったまま返される経路を含む
 - ネットワーク由来の値(Host、X-Forwarded-*、クライアント IP)を信用してテナントの解決や認可を行い、認証済みセッションとサーバー側で結び付けていないもの
@@ -47,6 +49,8 @@
 
 **Tenant / Company Boundary (multi-tenant SaaS):**
 - Queries keyed by user_id, company_id, dept_id, or session_id that do not also constrain by the caller's tenant/company scope, letting a caller in tenant A read or modify rows of tenant B
+- Owner/tenant/company predicates that cover only some branches of a query: an OR arm, a UNION branch, a joined table, a subquery, or a parent/child (hierarchy) traversal that is not constrained to the caller's scope, so rows of another tenant or company can be returned through that branch. A prior check that the requested ID belongs to the caller's scope does not constrain the related rows (children, linked records) the query returns. Do not flag a condition that applies to the whole WHERE via AND, an OR that only combines search fields, or a JOIN to a master table that has no tenant column
+- Endpoints serving an aggregate/analytics role or screen that return per-person identifiable rows (user ID or name together with sensitive values) instead of aggregates. If SECURITY_REVIEW_CONTEXT.md does not state whether that role may see individual-level data, do not assert a finding; list it under needs-triage and name the role's visibility scope as the point a human must confirm. If the context states the role may see individual data, do not report it
 - Role checks that grant an "admin" unconditional access across companies or tenants. Unless SECURITY_REVIEW_CONTEXT.md explicitly declares a cross-tenant super-user role, treat an admin as scoped to its own tenant/company
 - Mutable state shared across requests (module-level or singleton instance fields, caches keyed only by user_id) that can return another request's or another tenant's data — including fail-open paths where a caught exception leaves a previous request's result in place and returns it
 - Tenant resolution or authorization that trusts network-derived values (Host, X-Forwarded-*, client IP) without a server-side binding to the authenticated session
