@@ -58,7 +58,7 @@ cp -r /tmp/llm-security-scan/.claude/skills/llm-security-scan .claude/skills/
 
 ### 2. 前提情報を書く(推奨)
 
-`.claude/skills/llm-security-scan/rules/sut-context.template.md` をコピーし、対象リポジトリのルートに `SECURITY_REVIEW_CONTEXT.md` として置く。構成、TLS 終端、認証方式、テナント方式、ロールの意味、扱う機微データ、受容済みのリスクを書く。無くても動くが、環境に依存する判断(TLS、テナント、admin の範囲)の精度が下がる。
+`.claude/skills/llm-security-scan/rules/sut-context.template.md` をコピーし、対象リポジトリのルートに `SECURITY_REVIEW_CONTEXT.md` として置く。構成、TLS 終端、認証方式、テナント方式、ロールの意味、扱う機微データ、受容済みのリスクを書く。**事実の直後に「ただし、〜を意味しない」の 1 文(ガード文)を足すこと**(事実が広く解釈されて、関連する確認が省かれるのを防ぐ。書き方の注意はテンプレートの冒頭)。無くても動くが、環境に依存する判断(TLS、テナント、admin の範囲)の精度が下がる。
 
 ### 3. 実行
 
